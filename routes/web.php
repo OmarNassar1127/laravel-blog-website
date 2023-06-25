@@ -28,12 +28,16 @@ Route::get('/admins-only', function(){
 Route::get('/', [UserController::class, "showCorrectHomePage"])->name('login');
 //Registration
 Route::post('/register', [UserController::class, "register"])->middleware('guest');
+
 //Login
 Route::post('/login', [UserController::class, "login"])->middleware('guest');
+//Logut
 Route::post('/logout', [UserController::class, "logout"])->middleware('mustBeLoggedIn');
+//Post related Crud actions
 Route::delete('/post/{post}', [PostController::class, "delete"])->middleware('can:delete,post');
 Route::get('/post/{post}/edit', [PostController::class, 'showEditForm'])->middleware('can:update,post');
 Route::PUT('/post/{post}', [PostController::class, 'actuallyUpdate'])->middleware('can:update,post');
+//User related Crud actions
 Route::get('/manage-avatar', [UserController::class, 'showAvatarForm'])->middleware('mustBeLoggedIn');
 Route::post('/manage-avatar', [UserController::class, 'storeAvatar'])->middleware('mustBeLoggedIn');
 Route::get('/manage-username', [UserController::class, 'showUsernameForm'])->middleware('mustBeLoggedIn');
@@ -54,7 +58,7 @@ Route::get('/profile/{user:username}', [UserController::class, 'profile']);
 Route::get('/profile/{user:username}/followers', [UserController::class, 'profileFollowers']);
 Route::get('/profile/{user:username}/following', [UserController::class, 'profileFollowing']);
 
-
+// Profile related routes in JSON formats
 Route::get('/profile/{user:username}/raw', [UserController::class, 'profileRaw']);
 Route::get('/profile/{user:username}/followers/raw', [UserController::class, 'profileFollowersRaw']);
 Route::get('/profile/{user:username}/following/raw', [UserController::class, 'profileFollowingRaw']);

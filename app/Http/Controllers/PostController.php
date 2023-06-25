@@ -11,35 +11,62 @@ use Illuminate\Support\Facades\Mail;
 class PostController extends Controller
 {
 
-    public function search($term){
-        $posts = Post::search($term)->get();
+    public function search($term)
+    {
+        // Query for posts with matching title or username
+        $posts = Post::query()
+            ->where('title', 'LIKE', '%' . $term . '%') // Search by post title
+            ->orWhereHas('user', function ($query) use ($term) {
+                $query->where('username', 'LIKE', '%' . $term . '%'); // Search by username
+            })
+            ->get();
+    
+        // Eager load the user relationship with specific columns
         $posts->load('user:id,username,avatar');
+    
+        // Return the collection of posts
         return $posts;
     }
-    public function actuallyUpdate(Post $post, Request $request) {
+    
+
+    public function actuallyUpdate(Post $post, Request $request)
+    {
+        // Validate the incoming fields
         $incomingFields = $request->validate([
             'title' => 'required',
             'body' => 'required'
         ]);
-        $incomingFields['title'] = strip_tags(($incomingFields['title']));
-        $incomingFields['body'] = strip_tags(($incomingFields['body']));
 
+        // Strip HTML tags from the title and body fields
+        $incomingFields['title'] = strip_tags($incomingFields['title']);
+        $incomingFields['body'] = strip_tags($incomingFields['body']);
+
+        // Update the post with the validated and sanitized fields
         $post->update($incomingFields);
+
+        // Redirect back with a success message
         return back()->with('success', 'Post successfully updated');
-
     }
-    public function editApi(Post $post, Request $request) {
+
+    public function editApi(Post $post, Request $request)
+    {
+        // Validate the incoming fields
         $incomingFields = $request->validate([
             'title' => 'required',
             'body' => 'required'
         ]);
-        $incomingFields['title'] = strip_tags(($incomingFields['title']));
-        $incomingFields['body'] = strip_tags(($incomingFields['body']));
 
+        // Strip HTML tags from the title and body fields
+        $incomingFields['title'] = strip_tags($incomingFields['title']);
+        $incomingFields['body'] = strip_tags($incomingFields['body']);
+
+        // Update the post with the validated and sanitized fields
         $post->update($incomingFields);
-        return 'Post successfully updated broski';
 
+        // Return a success message
+        return 'Post successfully updated broski';
     }
+
     public function showEditForm(Post $post) {
         return view('/edit-post', ['post' => $post]);
     }
@@ -66,30 +93,62 @@ class PostController extends Controller
         return view('create-post');
     }
     
-    public function storeNewPost(Request $request) {
+    public function storeNewPost(Request $request)
+    {
+        // Validate the incoming request fields
         $incomingFields = $request->validate([
             'title' => 'required',
             'body' => 'required'
         ]);
-        $incomingFields['title'] = strip_tags(($incomingFields['title']));
-        $incomingFields['body'] = strip_tags(($incomingFields['body']));
+
+        // Strip HTML tags from the title and body fields
+        $incomingFields['title'] = strip_tags($incomingFields['title']);
+        $incomingFields['body'] = strip_tags($incomingFields['body']);
+
+        // Set the user_id field to the ID of the authenticated user
         $incomingFields['user_id'] = auth()->id();
 
+        // Create a new Post using the validated and modified fields
         $newPost = Post::create($incomingFields);
-        dispatch(new SendNewPostEmail(['sendTo' => auth()->user()->email, 'name' => auth()->user()->username, 'title' => $newPost->title ]));
+
+        // Dispatch a job to send a new post email notification
+        dispatch(new SendNewPostEmail([
+            'sendTo' => auth()->user()->email,
+            'name' => auth()->user()->username,
+            'title' => $newPost->title
+        ]));
+
+        // Redirect to the newly created post with a success message
         return redirect("/post/{$newPost->id}")->with('success', 'New post successfully created');
     }
-    public function storeNewPostApi(Request $request) {
+
+    public function storeNewPostApi(Request $request)
+    {
+        // Validate the incoming request fields
         $incomingFields = $request->validate([
             'title' => 'required',
             'body' => 'required'
         ]);
-        $incomingFields['title'] = strip_tags(($incomingFields['title']));
-        $incomingFields['body'] = strip_tags(($incomingFields['body']));
+
+        // Strip HTML tags from the title and body fields
+        $incomingFields['title'] = strip_tags($incomingFields['title']);
+        $incomingFields['body'] = strip_tags($incomingFields['body']);
+
+        // Set the user_id field to the ID of the authenticated user
         $incomingFields['user_id'] = auth()->id();
 
+        // Create a new Post using the validated and modified fields
         $newPost = Post::create($incomingFields);
-        dispatch(new SendNewPostEmail(['sendTo' => auth()->user()->email, 'name' => auth()->user()->username, 'title' => $newPost->title ]));
+
+        // Dispatch a job to send a new post email notification
+        dispatch(new SendNewPostEmail([
+            'sendTo' => auth()->user()->email,
+            'name' => auth()->user()->username,
+            'title' => $newPost->title
+        ]));
+
+        // Return the ID of the newly created post
         return $newPost->id;
     }
+
 }
