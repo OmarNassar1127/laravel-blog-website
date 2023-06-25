@@ -68,7 +68,7 @@
         {{session('error')}}
       </div>
     </div>
-@endif
+    @endif
 
     {{$slot}}
 
