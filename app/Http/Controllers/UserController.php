@@ -139,7 +139,7 @@ class UserController extends Controller
     public function showCorrectHomePage()
     {
         if (auth()->check()) {
-            return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->paginate(4)]);
+            return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->paginate(6)]);
         } else {
             $postCount = Cache::remember('postCount', 20, function(){
                 return Post::count();
