@@ -63,17 +63,26 @@ Route::get('/profile/{user:username}/raw', [UserController::class, 'profileRaw']
 Route::get('/profile/{user:username}/followers/raw', [UserController::class, 'profileFollowersRaw']);
 Route::get('/profile/{user:username}/following/raw', [UserController::class, 'profileFollowingRaw']);
 
-//Chat routes
+//Chat route
 Route::post('/send-chat-message', function (Request $request) {
-    $formFields = $request->validate([
+  // Validate the form fields
+  $formFields = $request->validate([
       'textvalue' => 'required'
-    ]);
-  
-    if (!trim(strip_tags($formFields['textvalue']))) {
+  ]);
+
+  // Check if the text value is empty or contains only HTML tags
+  if (!trim(strip_tags($formFields['textvalue']))) {
       return response()->noContent();
-    }
-  
-    broadcast(new ChatMessage(['username' =>auth()->user()->username, 'textvalue' => strip_tags($request->textvalue), 'avatar' => auth()->user()->avatar]))->toOthers();
-    return response()->noContent();
-  
-  })->middleware('mustBeLoggedIn');
+  }
+
+  // Broadcast the chat message to other users
+  broadcast(new ChatMessage([
+      'username' => auth()->user()->username,
+      'textvalue' => strip_tags($request->textvalue),
+      'avatar' => auth()->user()->avatar
+  ]))->toOthers();
+
+  // Return a no-content response
+  return response()->noContent();
+
+})->middleware('mustBeLoggedIn');
