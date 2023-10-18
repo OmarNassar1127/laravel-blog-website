@@ -199,7 +199,7 @@ class UserController extends Controller
     {
         if (auth()->check()) {
             // Render the 'homepage-feed' view with the authenticated user's feed posts
-            $posts = auth()->user()->feedPosts()->latest()->paginate(6);
+            $posts = auth()->user()->feedPosts()->latest()->paginate(10);
             return view('homepage-feed', ['posts' => $posts]);
         } else {
             // Check the cache for the post count or retrieve it from the database if not cached
