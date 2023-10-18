@@ -25,7 +25,7 @@ export default class Profile {
                 this.contentArea.innerHTML = DOMPurify.sanitize(
                     response.data.theHTML
                 );
-                document.title = response.data.docTitle + " | OurApp";
+                document.title = response.data.docTitle + " | BlogPage";
                 link.classList.add("active");
             }
         });
@@ -38,7 +38,7 @@ export default class Profile {
         e.preventDefault();
         const response = await axios.get(e.target.href + "/raw");
         this.contentArea.innerHTML = DOMPurify.sanitize(response.data.theHTML);
-        document.title = response.data.docTitle + " | OurApp";
+        document.title = response.data.docTitle + " | BlogPage";
 
         history.pushState({}, "", e.target.href);
     }
